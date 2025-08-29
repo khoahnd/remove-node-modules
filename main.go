@@ -12,21 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
-	"unsafe"
-)
-
-// Windows API constants for MessageBox
-const (
-	MB_OK       = 0x00000000
-	MB_ICONINFO = 0x00000040
-)
-
-// Windows API functions
-var (
-	user32      = syscall.NewLazyDLL("user32.dll")
-	messageBoxW = user32.NewProc("MessageBoxW")
 )
 
 // showMessageBox displays a message box on Windows, notification on macOS, and prints to console on Linux
@@ -39,19 +25,6 @@ func showMessageBox(title, message string) {
 	default: // Linux and others
 		fmt.Printf("\n🎉 %s\n%s\n", title, message)
 	}
-}
-
-// showWindowsMessageBox displays a Windows message box
-func showWindowsMessageBox(title, message string) {
-	titlePtr, _ := syscall.UTF16PtrFromString(title)
-	messagePtr, _ := syscall.UTF16PtrFromString(message)
-
-	messageBoxW.Call(
-		0,
-		uintptr(unsafe.Pointer(messagePtr)),
-		uintptr(unsafe.Pointer(titlePtr)),
-		uintptr(MB_OK|MB_ICONINFO),
-	)
 }
 
 // showMacNotification displays a macOS notification and dialog
