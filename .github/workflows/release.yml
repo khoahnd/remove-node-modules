@@ -37,7 +37,7 @@ jobs:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
       run: |
-        go build -ldflags="-s -w" -o ${{ matrix.output }} main.go
+        go build -ldflags="-s -w" -o ${{ matrix.output }}
 
     - name: Create archive (Windows)
       if: matrix.goos == 'windows'
