@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build for multiple platforms
@@ -14,15 +17,19 @@ jobs:
           - goos: windows
             goarch: amd64
             output: node-module-cleaner.exe
+            archive: node-module-cleaner-windows-amd64.zip
           - goos: linux
             goarch: amd64
             output: node-module-cleaner
+            archive: node-module-cleaner-linux-amd64.tar.gz
           - goos: darwin
             goarch: amd64
             output: node-module-cleaner-macos
+            archive: node-module-cleaner-macos-amd64.tar.gz
           - goos: darwin
             goarch: arm64
             output: node-module-cleaner-macos-arm64
+            archive: node-module-cleaner-macos-arm64.tar.gz
 
     steps:
     - uses: actions/checkout@v4
@@ -42,63 +49,27 @@ jobs:
     - name: Create archive (Windows)
       if: matrix.goos == 'windows'
       run: |
-        zip node-module-cleaner-windows-amd64.zip ${{ matrix.output }} README.md
+        zip ${{ matrix.archive }} ${{ matrix.output }} README.md
 
     - name: Create archive (Linux)
       if: matrix.goos == 'linux'
       run: |
-        tar -czf node-module-cleaner-linux-amd64.tar.gz ${{ matrix.output }} README.md
+        tar -czf ${{ matrix.archive }} ${{ matrix.output }} README.md
 
     - name: Create archive (macOS Intel)
       if: matrix.goos == 'darwin' && matrix.goarch == 'amd64'
       run: |
-        tar -czf node-module-cleaner-macos-amd64.tar.gz ${{ matrix.output }} README.md
+        tar -czf ${{ matrix.archive }} ${{ matrix.output }} README.md
 
     - name: Create archive (macOS Apple Silicon)
       if: matrix.goos == 'darwin' && matrix.goarch == 'arm64'
       run: |
-        tar -czf node-module-cleaner-macos-arm64.tar.gz ${{ matrix.output }} README.md
+        tar -czf ${{ matrix.archive }} ${{ matrix.output }} README.md
 
-    - name: Upload Windows Release Asset
-      if: matrix.goos == 'windows'
-      uses: actions/upload-release-asset@v1
+    - name: Upload Release Assets
+      uses: softprops/action-gh-release@v1
+      if: github.event_name == 'release'
+      with:
+        files: ${{ matrix.archive }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./node-module-cleaner-windows-amd64.zip
-        asset_name: node-module-cleaner-windows-amd64.zip
-        asset_content_type: application/zip
-
-    - name: Upload Linux Release Asset
-      if: matrix.goos == 'linux'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./node-module-cleaner-linux-amd64.tar.gz
-        asset_name: node-module-cleaner-linux-amd64.tar.gz
-        asset_content_type: application/gzip
-
-    - name: Upload macOS Intel Release Asset
-      if: matrix.goos == 'darwin' && matrix.goarch == 'amd64'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./node-module-cleaner-macos-amd64.tar.gz
-        asset_name: node-module-cleaner-macos-amd64.tar.gz
-        asset_content_type: application/gzip
-
-    - name: Upload macOS Apple Silicon Release Asset
-      if: matrix.goos == 'darwin' && matrix.goarch == 'arm64'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./node-module-cleaner-macos-arm64.tar.gz
-        asset_name: node-module-cleaner-macos-arm64.tar.gz
-        asset_content_type: application/gzip
