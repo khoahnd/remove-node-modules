@@ -1,6 +1,6 @@
 //go:build !windows
 
-package main
+package services
 
 // showWindowsMessageBox is a no-op on non-Windows platforms
 func showWindowsMessageBox(title, message string) {

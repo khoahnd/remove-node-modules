@@ -23,10 +23,6 @@ jobs:
             output: node-module-cleaner
             archive: node-module-cleaner-linux-amd64.tar.gz
           - goos: darwin
-            goarch: amd64
-            output: node-module-cleaner-macos
-            archive: node-module-cleaner-macos-amd64.tar.gz
-          - goos: darwin
             goarch: arm64
             output: node-module-cleaner-macos-arm64
             archive: node-module-cleaner-macos-arm64.tar.gz
@@ -57,18 +53,13 @@ jobs:
       run: |
         tar -czf ${{ matrix.archive }} ${{ matrix.output }} README.md
 
-    - name: Create archive (macOS Intel)
-      if: matrix.goos == 'darwin' && matrix.goarch == 'amd64'
-      run: |
-        tar -czf ${{ matrix.archive }} ${{ matrix.output }} README.md
-
     - name: Create archive (macOS Apple Silicon)
       if: matrix.goos == 'darwin' && matrix.goarch == 'arm64'
       run: |
         tar -czf ${{ matrix.archive }} ${{ matrix.output }} README.md
 
     - name: Upload Release Assets
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: github.event_name == 'release'
       with:
         files: ${{ matrix.archive }}
